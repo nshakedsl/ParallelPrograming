@@ -1,6 +1,7 @@
 # 325655058 ofir gurvits
 # 323082867 Shaked Solomon
-
+.globl hamming_dist
+.globl b64_distance
 .section .data
     .align 16
 .section .rodata
