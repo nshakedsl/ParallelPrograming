@@ -19,10 +19,12 @@ main:	# the main function:
     # scanf("%s",str1);
 
     leaq    format(%rip), %rdi #load input format for scanf
-    subq    $128, %rsp  # allocate stack space for str1
-    leaq    (%rsp),%rsi # load adress for *str1 to rsi
+    subq    $136, %rsp  # allocate stack space for str1
+    leaq    8(%rsp),%rsi # load adress for *str1 to rsi
     xorq    %rax,%rax
+
     call    scanf
+    addq $8, %rsp    # Adjust the stack pointer
 
     popq    %rbx    #restore rbx back to normal
 	movq	$0, %rax	#return value is zero (just like in c - we tell the OS that this program finished seccessfully)
