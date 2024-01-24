@@ -7,7 +7,7 @@ AS = as
 OUT = program
 
 # Define object files
-OBJS = main.o hamming.o
+OBJS = main.o hamming.o b64.o
 
 # Link object files to create the final executable
 $(OUT): $(OBJS)
@@ -20,7 +20,9 @@ main.o: main.c libstr.h
 # Assemble hamming.s to hamming.o
 hamming.o: hamming.s
 	$(AS) -o hamming.o hamming.s
-
+# compile b64.c to b64.o
+b64.o: b64.o
+	$(CC) -c b64.c -o b64.o
 # Clean up
 clean:
 	rm -f $(OUT) $(OBJS)

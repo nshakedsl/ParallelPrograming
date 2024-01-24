@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include "libstr.h"
-
 #define arraySize(x) (sizeof(x) / sizeof(x[0]))
 
 int main(void) {
     /* Init menu-related data */
     int (*functions[])(char *, char *) = {hamming_dist, b64_distance};
     int numFuncs = arraySize(functions);
+    printf("number of funcs is %d\n",numFuncs);
     char *descriptions[] = {"hamming distance", "base64 distance"};
     int choice = 0;
 
