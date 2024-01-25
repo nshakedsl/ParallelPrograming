@@ -19,7 +19,8 @@ hamming_dist: #recieves as arguments two pointers %rdi = &str1 %rsi = &str2
     .L4:
     pmovmskb ecx,xmm0 # load the msb of each byte to a bit in eax
     popcnt  ecx,ecx   # count matching chars
-    addq    rcx,rax   # add the amount of matching chars to the return value
+    add     rax,16   # add the amount of matching chars to the return value
+    sub      rax,rcx
     movdqa  xmm1, [rdi] # load the first 16 chars
     movdqa  xmm2, [rsi] # load the first 16 chars
     add    rdi,16   # move forward 16 characters
@@ -33,7 +34,7 @@ hamming_dist: #recieves as arguments two pointers %rdi = &str1 %rsi = &str2
     popcnt   ecx,ecx   # count matching chars
     add      rax,16   # add the amount of matching chars to the return value
     sub      rax,rcx
-
+    sub      rax, 16
 	mov 	 rsp, rbp	#restore stack
 	pop 	 rbp
 	ret			        #return turn
