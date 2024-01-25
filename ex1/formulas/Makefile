@@ -19,7 +19,7 @@ formula2.o: formula2.s
 
 # Compile forumla1.c to forumla1.o
 forumla1.o: forumla1.c
-	$(CC) -c forumla1.c -o forumla1.o $(CFLAGS)
+	$(CC) -c forumla1.c -o forumla1.o $(CFLAGS) -mavx -mfma
 
 # Clean up
 clean:
