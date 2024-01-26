@@ -1,10 +1,11 @@
 #define SIZE_TOT 256
 #define NUM_OF_FLOATS SIZE_TOT/(sizeof(float)*8)
 #include "immintrin.h"
+#include "math.h"
 
 float formula1(float *x, unsigned int length){
     float sum = 0;
-    float bot_mul, placeholder[8];
+    float bot_mul,top_sum, placeholder[8];
     __m256 loaded; // var to load from memory the vectors
     __m256 bottom_mul = _mm256_set1_ps(1.0);
     __m256 ONE_ARRAY = _mm256_set1_ps(1.0);
@@ -20,10 +21,17 @@ float formula1(float *x, unsigned int length){
     _mm256_storeu_ps(placeholder,bottom_mul);
     bot_mul = placeholder[0] * placeholder[1] *placeholder[2] * placeholder[4] * placeholder[5] * placeholder[6] *
             placeholder[7] * placeholder[3];
+    _mm256_storeu_ps(placeholder,top_addition);
+    top_sum = placeholder[0] * placeholder[1] *placeholder[2] * placeholder[4] * placeholder[5] * placeholder[6] *
+              placeholder[7] * placeholder[3];
 
     //sum all leftover elements
     for(; i< length; ++i){
         bot_mul *= x[i]*x[i] + 1;
+        top_sum += sqrtf(x[i]);
     }
+    top_sum = powf(top_sum,1/3);
+    sum = top_sum/bot_mul + 1;
+    sum = sqrt(sum);
     return sum;
 }

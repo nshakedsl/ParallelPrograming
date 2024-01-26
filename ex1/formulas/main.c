@@ -12,7 +12,7 @@
 #define MAX_VAl 9999.9999
 
 int is_close(float f1, float f2) {
-    return f1 - f2 <= MAX_ERROR && f2 - f1 <= MAX_ERROR;
+    return !(f1 - f2 <= MAX_ERROR && f2 - f1 <= MAX_ERROR);
 }
 
 
