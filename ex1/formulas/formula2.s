@@ -5,6 +5,7 @@
 .globl formula2
 .section .data
     .align 16
+    float_array: .float 1.0, 1.0, 1.0, 1.0
 .section .rodata
 
 .text	#the beginnig of the code
@@ -20,12 +21,11 @@ formula2: #recieves as arguments two pointers %rdi = &str1 %rsi = &str2
     # calculating x^2 in xmm3
     # calculating y^2 in xmm4
     vxorps xmm2, xmm2, xmm2
-    vxorps xmm3, xmm3, xmm3
+    vmovaps xmm3, [float_array]
     vxorps xmm4, xmm4, xmm4
     vxorps xmm5, xmm5, xmm5 # Xi^2
     vxorps xmm6, xmm6, xmm6 # Yi^2
-    vxorps xmm7, xmm7, xmm7 # 2xiyi + 1
-
+    vxorps xmm7, xmm7, xmm7 # 2xiyi
     # the loop
     xor r8, r8 # defining byte counter in r8
     xor r9, r9 # defining loop counter in r9
@@ -36,50 +36,76 @@ formula2: #recieves as arguments two pointers %rdi = &str1 %rsi = &str2
 # inside the loop
     vmovaps xmm0, [rdi + r8] # loading x value
     vmovaps xmm1, [rsi + r8] # loading y value
-
     # calculating xy
     vmulps xmm5, xmm0, xmm1
     # adding xy to sum(xy)
-    vaddps xmm2, xmm5, xmm2
-
-    # calculating x^2, and adding it to sum(x^2)
+    vaddps xmm2, xmm5, xmm2 # calculate sigma xy
+    # calculating xi^2, and yi^2
     vmulps xmm0, xmm0, xmm0
-    vaddps xmm3, xmm0, xmm3
-
-    # calculating y^2, and adding it to sum(y^2)
     vmulps xmm1, xmm1, xmm1
-    vaddps xmm4, xmm1, xmm4
-
-
-
+    vaddps xmm5, xmm5, xmm5 # calculate 2xy
+    vaddps xmm1, xmm1, xmm0 # xi^2 + yi^2
+    vsubps xmm1, xmm1, xmm5 # xi^2 + yi^2 - 2xiyi
+    vaddps xmm1, xmm3, xmm1 # xi^2 + yi^2 - 2xiyi + 1
+    vmulps xmm4, xmm4, xmm1 # store Pi (xi^2 + yi^2 - 2xiyi + 1)
     add r8, 16 # increasing byte counter
     add r9, 4 # increasing loop counter
 
     jmp .for_loop # jumping to the start of the loop
 
 .end_for_loop:
-    vaddps xmm3, xmm4, xmm3 # calculating sum(x^2) + sum(y^2)
-
-    # summing the 4 seperate values in xmm2, to one value
-    vshufps xmm6, xmm2, xmm2, 0b01001110
-    vaddps xmm2, xmm6, xmm2
-    vshufps xmm6, xmm2, xmm2, 0b10110001
-    vaddps xmm2, xmm6, xmm2
-
-    # summing the 4 seperate values in xmm3, to one value
-    vshufps xmm6, xmm3, xmm3, 0b01001110
-    vaddps xmm3, xmm6, xmm3
-    vshufps xmm6, xmm3, xmm3, 0b10110001
-    vaddps xmm3, xmm6, xmm3
 
 
-    # vsqrtss xmm3, xmm3, xmm3 #calculating sqrt(sum(x^2) + sum(y^2))
+    mov     r9,rdx
+    and     rdx,3
+    lea     rax, [rdx*4] # rax = rdx * 3
+    sub     r9, rax     # r9 = r9 - rax
+    xor     r8,r8
+    vxorps xmm1, xmm1, xmm1
+    vxorps xmm0, xmm0, xmm0
 
+loop_start:
+    cmp r8, rdx             # Compare counter (rcx) with rdx
+    jge loop_end            # Jump to loop_end if r8 >= rdx
 
-    #vsubss xmm0, xmm2, xmm3 # calculating the final value
-    ret
+    vmovss xmm0, xmm0, [rdi + r9] # Load float1 into the lowest 32 bits of xmm0
+    vshufps xmm0, xmm0, xmm0, 0x39 # Shift left by 32 bits
+    vmovss xmm1, xmm1, [rsi + r9] # Load float1 into the lowest 32 bits of xmm0
+    vshufps xmm1, xmm1, xmm1, 0x39 # Shift left by 32 bits
 
+    inc r8          # Increment the counter
+    add 4,r9
+    jmp loop_start   # Jump back to the start of the loop
+loop_end:
 
-	mov 	 rsp, rbp	#restore stack
-	pop 	 rbp
+    # recalculate xy
+    vmulps xmm5, xmm0, xmm1
+    # adding xy to sum(xy)
+    vaddps xmm2, xmm5, xmm2 # calculate sigma xy
+
+    # calculating xi^2, and yi^2
+    vmulps xmm0, xmm0, xmm0
+    vmulps xmm1, xmm1, xmm1
+    vaddps xmm5, xmm5, xmm5 # calculate 2xy
+    vaddps xmm1, xmm1, xmm0 # xi^2 + yi^2
+    vsubps xmm1, xmm1, xmm5 # xi^2 + yi^2 - 2xiyi
+    vaddps xmm1, xmm3, xmm1 # xi^2 + yi^2 - 2xiyi + 1
+    vmulps xmm4, xmm4, xmm1 # store Pi (xi^2 + yi^2 - 2xiyi + 1)
+
+    vshufps xmm0, xmm2, xmm2, 0b01001110
+    vaddps xmm2, xmm0, xmm2
+    vshufps xmm0, xmm2, xmm2, 0b10110001
+    vaddps xmm2, xmm0, xmm2
+
+    vshufps xmm0, xmm4, xmm4, 0b01001110
+    vmulps xmm4, xmm0, xmm4
+    vshufps xmm0, xmm4, xmm4, 0b10110001
+    vmulps xmm4, xmm0, xmm2
+
+    vdivps xmm0, xmm2, xmm4 # calculating the final value
+
+    xor     rax,rax
+    movd    eax,xmm0
+	mov 	rsp, rbp	#restore stack
+	pop 	rbp
 	ret			        #return turn
