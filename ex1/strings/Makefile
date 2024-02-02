@@ -22,7 +22,7 @@ hamming.o: hamming.s
 	$(AS) -o hamming.o hamming.s $(GFLAG)
 # compile b64.c to b64.o
 b64.o: b64.o
-	$(CC) -c b64.c -o b64.o $(GFLAG)
+	$(CC) -c b64.c -o b64.o $(GFLAG) -msse4.1
 # Clean up
 clean:
 	rm -f $(OUT) $(OBJS)

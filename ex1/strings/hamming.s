@@ -27,7 +27,8 @@ hamming_dist: #recieves as arguments two pointers %rdi = &str1 %rsi = &str2
     add     rsi,16   # move forward 16 characters 00010010
     pcmpistrm xmm1, xmm2, 0b01001000 # Compare for equality, result in XMM0
     jne .L4             # if null byte was encountered in xmm2 then zf is 0
-    jns .L4             # if null byte was encountered in xmm1 then zf is 0
+    jns .L4             # if null byte was encountered in xmm1 then sf is 0
+
 
     pmovmskb ecx,xmm0 # load the msb of each byte to a bit in eax
     popcnt   ecx,ecx # count matching chars
@@ -37,3 +38,18 @@ hamming_dist: #recieves as arguments two pointers %rdi = &str1 %rsi = &str2
 	mov 	 rsp, rbp	#restore stack
 	pop 	 rbp
 	ret			        #return turn
+.L5:
+    mov rdi,rsi
+.L6:
+    pmovmskb ecx,xmm0 # load the msb of each byte to a bit in eax
+    popcnt   ecx,ecx # count matching chars
+    add      rax,16  # add the amount of matching chars to the return value
+    sub      rax,rcx
+    sub      rax, 16
+    mov      rbx,rax
+    call     strlen
+    add      rax,rbx
+    pop      rbx
+	mov 	 rsp, rbp	#restore stack
+	pop 	 rbp
+	ret
