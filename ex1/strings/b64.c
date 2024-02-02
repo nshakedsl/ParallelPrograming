@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <immintrin.h>
+#include <math.h>
 #include "libstr.h"
-
 int char_to_base64_value(char c)
 {
     if (c >= 'A' && c <= 'Z')
@@ -44,7 +44,7 @@ int isValidBase64Char(char c)
 // Level 1
 
 // Function to remove non-base64 characters while maintaining the order of every other character
-void removeNonBase64Chars(char str[MAX_STR],int len)
+void removeNonBase64Chars(char str[MAX_STR], int len)
 {
     int j = 0;
 
@@ -64,9 +64,6 @@ int base64_string_to_int(char str[MAX_STR], int length)
 
     // TODO : Handle invalid input length is NOT a multiple of 4
 
-    // Create a const vector with powers of 64: [1, 64, 64^2, 64^3]
-    const __m128i POWERS_OF_64 = _mm_set_epi32(64 * 64 * 64, 64 * 64, 64, 1);
-
     // Process the input string in chunks of 4 characters
     for (int i = 0; i < length; i += 4)
     {
@@ -78,13 +75,14 @@ int base64_string_to_int(char str[MAX_STR], int length)
             char_to_base64_value(str[i + 2]),
             char_to_base64_value(str[i + 3])};
 
-        for (int j = 0; j < 4; j++)
-        {
-            printf("%d ", values[j]);
-        }
-
         // Load the numeric values into a 128-bit vector
         __m128i base64_values = _mm_set_epi32(values[3], values[2], values[1], values[0]);
+
+        __m128i POWERS_OF_64 = _mm_set_epi32(
+            pow(64, 3) * pow(64, 4 * i),
+            pow(64, 2) * pow(64, 4 * i),
+            64 * pow(64, 4 * i),
+            1 * pow(64, 4 * i));
 
         // Multiply the base64_chars vector by the powers_of_64 vector
         __m128i result = _mm_mullo_epi32(base64_values, POWERS_OF_64);
