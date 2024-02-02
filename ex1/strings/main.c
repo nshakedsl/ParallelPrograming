@@ -3,7 +3,7 @@
 #define arraySize(x) (sizeof(x) / sizeof(x[0]))
 
 int main(void) {
-    /* Init menu-related data */
+    // /* Init menu-related data */
     int (*functions[])(char *, char *) = {hamming_dist, b64_distance};
     int numFuncs = arraySize(functions);
     printf("number of funcs is %d\n",numFuncs);
@@ -35,6 +35,8 @@ int main(void) {
             printf("Result: %d\n", res);
         }
     }
+
+
 
     return 0;
 }

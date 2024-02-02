@@ -1,46 +1,119 @@
 #ifndef B64_C
 #define B64_C
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <immintrin.h>
 #include "libstr.h"
-#include "immintrin.h"
 
-// Create a mask to check for non-base64 characters
-const __m128i BASE64_MASK = _mm_set_epi8(
-    '+', '/', '0', '1', '2', '3', '4', '5',
-    '6', '7', '8', '9', 'A', 'B', 'C', 'D',
-    'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-    'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-    'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b',
-    'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-    'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-    's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
+int char_to_base64_value(char c)
+{
+    if (c >= 'A' && c <= 'Z')
+    {
+        return c - 'A';
+    }
+    else if (c >= 'a' && c <= 'z')
+    {
+        return c - 'a' + 26;
+    }
+    else if (c >= '0' && c <= '9')
+    {
+        return c - '0' + 52;
+    }
+    else if (c == '+')
+    {
+        return 62;
+    }
+    else if (c == '/')
+    {
+        return 63;
+    }
+    else
+    {
+        // Handle invalid characters
+        return -1;
+    }
+}
+
+// Function to check if a character is a valid base64 character
+int isValidBase64Char(char c)
+{
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '+' || c == '/';
+}
+
+// Level 1
+
+// Function to remove non-base64 characters while maintaining the order of every other character
+void removeNonBase64Chars(char str[MAX_STR])
+{
+    int j = 0;
+
+    for (int i = 0; i < len; i++)
+    {
+        if (isValidBase64Char(str[i]))
+        {
+            str[j++] = str[i];
+        }
+    }
+    str[j] = '\0';
+}
+
+// Level 2
+void base64_string_to_int(char str[MAX_STR], int length)
+{
+
+    // TODO : Handle invalid input length is NOT a multiple of 4
+
+    // Create a const vector with powers of 64: [1, 64, 64^2, 64^3]
+    const __m128i POWERS_OF_64 = _mm_set_epi32(64 * 64 * 64, 64 * 64, 64, 1);
+
+    // Process the input string in chunks of 4 characters
+    for (int i = 0; i < length; i += 4)
+    {
+
+        // Convert 4 base64 characters to numeric values
+        int values[4] = {
+            char_to_base64_value(str[i]),
+            char_to_base64_value(str[i + 1]),
+            char_to_base64_value(str[i + 2]),
+            char_to_base64_value(str[i + 3])};
+
+        for (int j = 0; j < 4; j++)
+        {
+            printf("%d ", values[j]);
+        }
+
+        // Load the numeric values into a 128-bit vector
+        __m128i base64_values = _mm_set_epi32(values[3], values[2], values[1], values[0]);
+
+        // Multiply the base64_chars vector by the powers_of_64 vector
+        __m128i result = _mm_mullo_epi32(base64_values, POWERS_OF_64);
+
+        // Extract the result values as a 4-element array
+        int32_t result_values[4];
+        _mm_storeu_si128((__m128i *)result_values, result);
+
+        // Do something with the result_values array (print, store, etc.)
+        for (int j = 0; j < 4; j++)
+        {
+            // Example: print each result value
+            printf("%d ", result_values[j]);
+        }
+        return 1;
+        printf("\n");
+    }
+}
 
 int b64_distance(char str1[MAX_STR], char str2[MAX_STR])
 {
-    return 0;
-}
-void detect_non_base64_chars_chunck(char str[16])
-{
-
-    // Load 16 bytes into a 128-bit register
-    __m128i input = _mm_loadu_si128((__m128i *)&str);
-
-    // Compare the input with the base64 mask
-    __m128i result = _mm_cmpeq_epi8(input, BASE64_MASK);
-
-    // Check if any byte is not equal to base64
-    if (!_mm_testz_si128(result, result))
-    {
-        printf("not base 64! !");
-    }
-}
-void detect_non_base64_chars(char str[MAX_STR])
-{
-
-    // Process the string in 16-byte chunks
-    for (int i = 0; i < MAX_STR; i += 16)
-    {
-        detect_non_base64_chars_chunck((__m128i *)&str[i]);
-    }
+    int len1 = strlen(str1);
+    int len2 = strlen(str2);
+    removeNonBase64Chars(str1, len1);
+    removeNonBase64Chars(str2, len2);
+    base64_string_to_int(str1, len1);
+    base64_string_to_int(str2, len2);
+    printf("%s\n", str1);
+    printf("%s\n", str2);
 }
 
 #endif

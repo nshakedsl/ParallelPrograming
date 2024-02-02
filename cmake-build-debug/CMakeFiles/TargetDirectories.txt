@@ -1,0 +1,3 @@
+C:/Users/shake/projects/ParallelPrograming/cmake-build-debug/CMakeFiles/ParallelPrograming.dir
+C:/Users/shake/projects/ParallelPrograming/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/shake/projects/ParallelPrograming/cmake-build-debug/CMakeFiles/rebuild_cache.dir
