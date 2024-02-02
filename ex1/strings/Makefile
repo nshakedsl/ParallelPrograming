@@ -5,13 +5,14 @@ AS = as
 GFLAG += -g
 # Define the output file name
 OUT = program
+LFLAGS = -lm
 
 # Define object files
 OBJS = main.o hamming.o b64.o
 
 # Link object files to create the final executable
 $(OUT): $(OBJS)
-	$(CC) -o $(OUT) $(OBJS) $(CFLAG) $(GFLAG)
+	$(CC) -o $(OUT) $(OBJS) $(CFLAG) $(GFLAG) $(LFLAGS)
 
 # Compile main.c to main.o
 main.o: main.c libstr.h
