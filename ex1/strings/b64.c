@@ -44,7 +44,7 @@ int isValidBase64Char(char c)
 // Level 1
 
 // Function to remove non-base64 characters while maintaining the order of every other character
-void removeNonBase64Chars(char str[MAX_STR])
+void removeNonBase64Chars(char str[MAX_STR],int len)
 {
     int j = 0;
 
@@ -59,7 +59,7 @@ void removeNonBase64Chars(char str[MAX_STR])
 }
 
 // Level 2
-void base64_string_to_int(char str[MAX_STR], int length)
+int base64_string_to_int(char str[MAX_STR], int length)
 {
 
     // TODO : Handle invalid input length is NOT a multiple of 4
