@@ -29,13 +29,19 @@ float formula1_test(float *x, unsigned int length) {
 
 float formula2_test(float *x, float *y, unsigned int length) {
     float sum = 0;
+    float sum2 = 0;
     for (int k = 0; k < length; k++) {
         float product = 1;
         for (int i = 0; i < length; i++) {
             product *= (x[i]*x[i] + y[i]*y[i] - 2*x[i]*y[i] + 1);
         }
+        if (sum == 0){
+            //printf("the product is %f\n",product);
+        }
         sum += (x[k]*y[k])/product;
+        sum2 += (x[k]*y[k]);
     }
+    //printf("the top sum is %f\n", sum2);
     return sum;
 }
 
