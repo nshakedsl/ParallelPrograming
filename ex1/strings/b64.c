@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <immintrin.h>
-#include <math.h>
 #include "libstr.h"
 int char_to_base64_value(char c)
 {
@@ -58,48 +57,63 @@ void removeNonBase64Chars(char str[MAX_STR], int len)
     str[j] = '\0';
 }
 
+// Function to calculate powers of 64 as integers
+int pow64(int exponent)
+{
+    int result = 1;
+    for (int i = 0; i < exponent; i++)
+    {
+        result *= 64;
+    }
+    return result;
+}
+
 // Level 2
 int base64_string_to_int(char str[MAX_STR], int length)
 {
 
-    // TODO : Handle invalid input length is NOT a multiple of 4
-
+    int total_sum = 0;
     // Process the input string in chunks of 4 characters
     for (int i = 0; i < length; i += 4)
     {
 
-        // Convert 4 base64 characters to numeric values
-        int values[4] = {
-            char_to_base64_value(str[i]),
-            char_to_base64_value(str[i + 1]),
-            char_to_base64_value(str[i + 2]),
-            char_to_base64_value(str[i + 3])};
+        int values[4] = {0, 0, 0, 0};
+        int powers_of_64[4] = {0, 0, 0, 0};
+        values[0] = char_to_base64_value(str[i]);
 
-        // Load the numeric values into a 128-bit vector
-        __m128i base64_values = _mm_set_epi32(values[3], values[2], values[1], values[0]);
+        powers_of_64[0] = pow64(i);
+        if (i + 1 < length)
+        {
+            values[1] = char_to_base64_value(str[i + 1]);
+            powers_of_64[1] = 64 * powers_of_64[0];
+        }
+        if (i + 2 < length)
+        {
+            values[2] = char_to_base64_value(str[i + 2]);
+            powers_of_64[2] = 64 * powers_of_64[1];
+        }
+        if (i + 3 < length)
+        {
+            values[3] = char_to_base64_value(str[i + 3]);
+            powers_of_64[3] = 64 * powers_of_64[2];
+        }
 
-        __m128i POWERS_OF_64 = _mm_set_epi32(
-            pow(64, 3) * pow(64, 4 * i),
-            pow(64, 2) * pow(64, 4 * i),
-            64 * pow(64, 4 * i),
-            1 * pow(64, 4 * i));
+        // Load the numeric values into a 128 - bit vector
+        __m128i values_vector = _mm_set_epi32(values[3], values[2], values[1], values[0]);
+        __m128i powers_of_64_vector = _mm_set_epi32(powers_of_64[3], powers_of_64[2], powers_of_64[1], powers_of_64[0]);
 
         // Multiply the base64_chars vector by the powers_of_64 vector
-        __m128i result = _mm_mullo_epi32(base64_values, POWERS_OF_64);
+        __m128i result = _mm_mullo_epi32(values_vector, powers_of_64_vector);
 
-        // Extract the result values as a 4-element array
-        int32_t result_values[4];
-        _mm_storeu_si128((__m128i *)result_values, result);
+        // Sum the four numbers in the result vector
+        __m128i sum = _mm_hadd_epi32(result, result);
+        sum = _mm_hadd_epi32(sum, sum);
 
-        // Do something with the result_values array (print, store, etc.)
-        for (int j = 0; j < 4; j++)
-        {
-            // Example: print each result value
-            printf("%d ", result_values[j]);
-        }
-        return 1;
-        printf("\n");
+        // Extract the final sum as a scalar integer
+        int finalSum = _mm_cvtsi128_si32(sum);
+        total_sum += finalSum;
     }
+    return total_sum;
 }
 
 int b64_distance(char str1[MAX_STR], char str2[MAX_STR])
@@ -108,10 +122,7 @@ int b64_distance(char str1[MAX_STR], char str2[MAX_STR])
     int len2 = strlen(str2);
     removeNonBase64Chars(str1, len1);
     removeNonBase64Chars(str2, len2);
-    base64_string_to_int(str1, len1);
-    base64_string_to_int(str2, len2);
-    printf("%s\n", str1);
-    printf("%s\n", str2);
+    return base64_string_to_int(str1, len1) - base64_string_to_int(str2, len2);
 }
 
 #endif
