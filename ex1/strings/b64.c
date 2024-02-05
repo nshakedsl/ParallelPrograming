@@ -39,7 +39,16 @@ int isValidBase64Char(char c)
 {
     return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '+' || c == '/';
 }
+void reverseString(char str[MAX_STR], int length)
+{
 
+    for (int i = 0; i < length / 2; i++)
+    {
+        char temp = str[i];
+        str[i] = str[length - 1 - i];
+        str[length - 1 - i] = temp;
+    }
+}
 // Level 1
 
 // Function to remove non-base64 characters while maintaining the order of every other character
@@ -98,7 +107,7 @@ int base64_string_to_int(char str[MAX_STR], int length)
             powers_of_64[3] = 64 * powers_of_64[2];
         }
 
-        // Load the numeric values into a 128 - bit vector
+        // Load the numeric powers_of_64 into a 128 - bit vector
         __m128i values_vector = _mm_set_epi32(values[3], values[2], values[1], values[0]);
         __m128i powers_of_64_vector = _mm_set_epi32(powers_of_64[3], powers_of_64[2], powers_of_64[1], powers_of_64[0]);
 
@@ -122,7 +131,13 @@ int b64_distance(char str1[MAX_STR], char str2[MAX_STR])
     int len2 = strlen(str2);
     removeNonBase64Chars(str1, len1);
     removeNonBase64Chars(str2, len2);
-    return base64_string_to_int(str1, len1) - base64_string_to_int(str2, len2);
+    int new_length1 = strlen(str1);
+    int new_length2 = strlen(str2);
+
+    reverseString(str1, new_length1);
+    reverseString(str2, new_length2);
+
+    return base64_string_to_int(str2, new_length2) - base64_string_to_int(str1, new_length1);
 }
 
 #endif

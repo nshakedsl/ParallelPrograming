@@ -4,7 +4,7 @@ CFLAG += -msse4.2
 AS = as
 GFLAG += -g
 # Define the output file name
-OUT = program
+OUT = main
 LFLAGS = -lm
 
 # Define object files
