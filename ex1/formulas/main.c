@@ -53,8 +53,11 @@ int main(void) {
 
     for (int i = 0; i < NUM_TESTS; i++) {
         unsigned int length = (rand() % MAX_LENGTH) + 1;
-        length = length/4;
-        length = length*4;
+        while (length %4 != 0) {
+            length = (rand() % MAX_LENGTH) + 1;
+        }
+        //length = length/4;
+        //length = length*4;
         for (unsigned int k = 0; k < length; k++) {
             x[k] = (((float)rand())/((float)RAND_MAX)) * (MAX_VAL - MIN_VAL) + MIN_VAL;
             y[k] = (((float)rand())/((float)RAND_MAX)) * (MAX_VAL - MIN_VAL) + MIN_VAL;
