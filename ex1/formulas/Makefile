@@ -2,7 +2,7 @@ CC = gcc
 CFLAG += -msse4.2 -g
 AS = as
 LFLAGS = -lm
-OUT = main
+OUT = part2.out
 
 OBJS = main.o forumla1.o formula2.o
 
