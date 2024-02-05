@@ -1,3 +1,5 @@
+// 325655058 ofir gurvits
+// 323082867 Shaked Solomon
 #define SIZE_TOT 256
 
 #include "immintrin.h"

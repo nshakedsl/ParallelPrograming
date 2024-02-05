@@ -1,3 +1,5 @@
+# 325655058 ofir gurvits
+# 323082867 Shaked Solomon
 # Define the compiler and the assembler
 CC = gcc
 CFLAG += -msse4.2

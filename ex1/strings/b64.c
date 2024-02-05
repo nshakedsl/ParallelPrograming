@@ -1,3 +1,6 @@
+// 325655058 ofir gurvits
+// 323082867 Shaked Solomon
+
 #ifndef B64_C
 #define B64_C
 #include <stdint.h>
